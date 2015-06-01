@@ -14,26 +14,28 @@ module Ledger
       blocks = parse_to_blocks(string)
 
       # Parse blocks
-      journal.transactions << blocks.select {|e| e =~ /^\d{4}\/\d{2}\/\d{2} / }
-        .map {|e| Transaction.from_s(e) }
+      journal.transactions = blocks.select {|line, block| block =~ /^\d{4}\/\d{2}\/\d{2} / }
+        .map {|line, block| Transaction.from_s(block, line_nr: line) }
 
       journal
     end
 
     def self.parse_to_blocks(string)
-      blocks = []
+      blocks = {}
       block = nil
+      nr = 0
 
-      string.split("\n").each do |line|
+      string.split("\n").each_with_index do |line, i|
         if line =~ /^\S+/
-          blocks << block if block
+          blocks[nr] = block if block
 
           block = line
+          nr = i + 1
         else
           block += "\n" + line if block
         end
       end 
-      blocks << block if block
+      blocks[nr] = block if block
 
       blocks
     end
