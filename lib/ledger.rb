@@ -9,6 +9,7 @@ $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 require 'ledger/journal'
 require 'ledger/transaction'
 require 'ledger/posting'
+require 'ledger/amount'
 
 
 

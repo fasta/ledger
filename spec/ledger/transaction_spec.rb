@@ -22,7 +22,7 @@ describe Transaction do
     it "should return a Transaction matching the given string" do
       str = <<-EoT
       2015/05/30 Description
-        Account   Amount
+        Account   $1.00
         Account
       EoT
 
@@ -37,7 +37,7 @@ describe Transaction do
     it "should initialize the Transaction with provided options" do
       str = <<-EoT
       2015/05/30 Description
-        Account   Amount
+        Account   $1.00
         Account
       EoT
 

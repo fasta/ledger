@@ -6,6 +6,9 @@ module Ledger
       posting = Posting.new
 
       posting.account, posting.amount = string.split(/\s\s+/, 2).map {|e| e.strip }
+      if posting.amount
+        posting.amount = Amount.from_s(posting.amount)
+      end
 
       posting
     end

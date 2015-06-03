@@ -31,7 +31,7 @@ EoT
     it "should return the parsed Journal" do
       j = Journal.parse(<<EoT
 2015/05/30 Description
-  Account Amount
+  Account   $1
   Account
 EoT
 )
