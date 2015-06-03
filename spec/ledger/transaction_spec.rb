@@ -18,6 +18,55 @@ describe Transaction do
     end
   end
 
+  describe "#balanced?" do
+    it "should return true if all postings balance out" do
+      str = <<-EoT
+      2015/06/01 Description
+        Account A   CHF 24.00
+        Account B   CHF 12.00
+        Account C   CHF -36.00
+      EoT
+      tx = Transaction.from_s(str)
+
+      tx.balanced?.must_equal true
+    end
+
+    it "should return false if the postings do not balance out" do
+      str = <<-EoT
+      2015/06/01 Description
+        Account A   CHF 24.00
+        Account B   CHF 12.00
+      EoT
+      tx = Transaction.from_s(str)
+
+      tx.balanced?.must_equal false
+    end
+
+    it "should return true if exactly one posting has no amount specified (eliding amounts)" do
+      str = <<-EoT
+      2015/06/01 Description
+        Account A   CHF 24.00
+        Account B   CHF 12.00
+        Account C
+      EoT
+      tx = Transaction.from_s(str)
+
+      tx.balanced?.must_equal true
+    end
+
+    it "should raise an ArgumentError if more than one posting has no amount specified" do
+      str = <<-EoT
+      2015/06/01 Description
+        Account A   CHF 24.00
+        Account B
+        Account C
+      EoT
+      tx = Transaction.from_s(str)
+
+      -> { tx.balanced? }.must_raise ArgumentError
+    end
+  end
+
   describe ".from_s" do
     it "should return a Transaction matching the given string" do
       str = <<-EoT

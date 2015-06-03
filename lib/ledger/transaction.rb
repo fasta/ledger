@@ -10,6 +10,18 @@ module Ledger
       @postings = options[:postings] || []
     end
 
+    def balanced?
+      raise ArgumentError if postings.select {|p| p.amount.nil? }.count > 1
+
+      sum = postings.select {|p| !p.amount.nil? }.map {|p| p.amount }.reduce(:+)
+      if p = postings.select {|p| p.amount.nil?}.first
+        p.amount = Amount.new(commodity: sum.commodity, quantity: (sum.quantity * -1))
+        sum += p.amount
+      end
+
+      (sum.quantity == 0) ? true : false
+    end
+
     def self.from_s(string, options={})
       tx = Transaction.new(options)
 
