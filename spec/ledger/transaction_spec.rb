@@ -32,12 +32,9 @@ describe Transaction do
     end
 
     it "should return false if the postings do not balance out" do
-      str = <<-EoT
-      2015/06/01 Description
-        Account A   CHF 24.00
-        Account B   CHF 12.00
-      EoT
-      tx = Transaction.from_s(str)
+      tx = Transaction.new
+      tx.postings << Posting.from_s('Account A    CHF 24.00')
+      tx.postings << Posting.from_s('Account B    CHF 12.00')
 
       tx.balanced?.must_equal false
     end
@@ -55,13 +52,10 @@ describe Transaction do
     end
 
     it "should raise an ArgumentError if more than one posting has no amount specified" do
-      str = <<-EoT
-      2015/06/01 Description
-        Account A   CHF 24.00
-        Account B
-        Account C
-      EoT
-      tx = Transaction.from_s(str)
+      tx = Transaction.new
+      tx.postings << Posting.from_s('Account A    CHF 24.00')
+      tx.postings << Posting.from_s('Account B')
+      tx.postings << Posting.from_s('Account C')
 
       -> { tx.balanced? }.must_raise ArgumentError
     end
@@ -97,6 +91,15 @@ describe Transaction do
       tx.description.must_equal "Description"
       tx.line_nr.must_equal 120
       tx.postings.count.must_equal 2
+    end
+
+    it "should raise an ArgumentError if the provided Transaction does not balance out" do
+      str = <<-EoT
+      2015/06/03 Description
+        Account   $1.00
+      EoT
+
+      -> { tx = Transaction.from_s(str) }.must_raise ArgumentError
     end
   end
 

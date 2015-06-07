@@ -34,6 +34,7 @@ module Ledger
         tx.postings << Posting.from_s(line)
       end
 
+      raise ArgumentError unless tx.balanced?
       tx
     end
 
