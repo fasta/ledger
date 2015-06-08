@@ -59,6 +59,18 @@ describe Transaction do
 
       -> { tx.balanced? }.must_raise ArgumentError
     end
+
+    it "should balance a Transaction with different commodities" do
+      tx = Transaction.new
+      tx.postings << Posting.from_s('Account A    20 AAPL @ $19.95')
+      tx.postings << Posting.from_s('Account B    $-399.00')
+      tx.balanced?.must_equal true
+
+      tx = Transaction.new
+      tx.postings << Posting.from_s('Account A    20 AAPL @ $19.95')
+      tx.postings << Posting.from_s('Account B    $-400.00')
+      tx.balanced?.must_equal false
+    end
   end
 
   describe ".from_s" do
