@@ -6,6 +6,17 @@ module Ledger
       @transactions = []
     end
 
+    def balance
+      transactions.reduce({}) do |bal, tx|
+        tx.postings.each do |p|
+          # FIXME: Add support for multiple commodities in one account
+          bal[p.account] = (bal[p.account]) ? bal[p.account] + p.amount : p.amount
+        end
+
+        bal
+      end
+    end
+
     def self.parse(string)
       journal = Journal.new
 
