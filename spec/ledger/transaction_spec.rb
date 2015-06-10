@@ -18,6 +18,49 @@ describe Transaction do
     end
   end
 
+  describe "#complete?" do
+    it "should return true if all Postings have an Amount" do
+      tx = Transaction.new(postings: [Posting.from_s('Account A   $24.00'),
+                                      Posting.from_s('Account B   $-24.00')])
+
+      tx.complete?.must_equal true
+    end
+
+    it "should return false if a Posting does not have an Amount" do
+      tx = Transaction.new(postings: [Posting.from_s('Account A   $24.00'),
+                                      Posting.from_s('Account B')])
+
+      tx.complete?.must_equal false
+    end
+  end
+
+  describe "#complete!" do
+    it "should return the Transaction" do
+      tx = Transaction.new
+      tx.complete!.must_equal tx
+    end
+
+    it "should infer and set the Amount if a Posting has elided it" do
+      tx = Transaction.new(postings: [Posting.from_s('Account A   $24.00'),
+                                      Posting.from_s('Account B')])
+
+      tx.complete!
+
+      tx.postings.select {|p| p.account == 'Account A' }.first
+        .amount.must_equal Amount.from_s('$24.00')
+      tx.postings.select {|p| p.account == 'Account B' }.first
+        .amount.must_equal Amount.from_s('$-24.00')
+    end
+
+    it "should raise an ArgumentError if the Transaction cannot be completed" do
+      tx = Transaction.new(postings: [Posting.from_s('Account A   $24.00'),
+                                      Posting.from_s('Account B'),
+                                      Posting.from_s('Account C')])
+
+      -> { tx.complete! }.must_raise ArgumentError
+    end
+  end
+
   describe "#balanced?" do
     it "should return true if all postings balance out" do
       str = <<-EoT
@@ -49,6 +92,16 @@ describe Transaction do
       tx = Transaction.from_s(str)
 
       tx.balanced?.must_equal true
+    end
+
+    it "should complete! the Transaction if one  Posting has an elided Amount" do
+      tx = Transaction.new(postings: [Posting.from_s('Account A   $24.00'),
+                                      Posting.from_s('Account B')])
+
+      tx.must_respond_to(:complete!)
+      tx.balanced?.must_equal true
+      tx.postings.select {|p| p.account == 'Account B' }.first
+        .amount.must_equal Amount.from_s('$-24.00')
     end
 
     it "should raise an ArgumentError if more than one posting has no amount specified" do
@@ -112,6 +165,18 @@ describe Transaction do
       EoT
 
       -> { tx = Transaction.from_s(str) }.must_raise ArgumentError
+    end
+
+    it "should complete! the Transaction if one Posting has an elided Amount" do
+      str = <<-EoT
+      2015/05/30 Description
+        Account A   $1.00
+        Account B
+      EoT
+
+      tx = Transaction.from_s(str)
+      tx.postings.select {|p| p.account == 'Account B' }.first
+        .amount.must_equal Amount.from_s('$-1.00')
     end
   end
 

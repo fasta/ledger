@@ -13,5 +13,20 @@ require 'ledger/amount'
 
 
 
-module Ledger; end
+module Ledger
+
+  def self.balance(transactions)
+    raise ArgumentError unless transactions.select {|t| !t.complete? }.empty?
+    raise ArgumentError unless transactions.select {|t| !t.balanced? }.empty?
+
+    transactions.reduce({}) do |accounts, tx|
+      tx.postings.each do |p|
+        accounts[p.account] = (accounts[p.account]) ? accounts[p.account] + p.amount : p.amount
+      end
+
+      accounts
+    end
+  end
+
+end
 

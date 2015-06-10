@@ -5,6 +5,14 @@ include Ledger
 
 describe Posting do
 
+  describe "#initialize" do
+    it "should initialize the Posting" do
+      p = Posting.new
+
+      p.elided?.must_equal false
+    end
+  end
+
   describe ".from_s" do
     it "should return a Posting matching the string" do
       p = Posting.from_s("Account Name    CHF 1.00")
@@ -21,6 +29,14 @@ describe Posting do
       p.account.must_equal "Account Name"
       p.amount.must_equal Amount.from_s('1 AAPL')
       p.commodity_price.must_equal Amount.from_s('$9.95')
+    end
+
+    it "should mark the Posting if the amount has been elided" do
+      p = Posting.from_s("Account Name")
+
+      p.account.must_equal "Account Name"
+      p.amount.must_be_nil
+      p.elided?.must_equal true
     end
   end
 

@@ -10,14 +10,29 @@ module Ledger
       @postings = options[:postings] || []
     end
 
-    def balanced?
+    def complete?
+      (postings.select {|p| p.amount.nil? }.empty?) ? true : false
+    end
+
+    def complete!
       raise ArgumentError if postings.select {|p| p.amount.nil? }.count > 1
 
       sum = postings.select {|p| !p.amount.nil? }.map {|p| p.price }.reduce(:+)
-      if p = postings.select {|p| p.amount.nil?}.first
-        p.amount = Amount.new(commodity: sum.commodity, quantity: (sum.quantity * -1))
-        sum += p.amount
+
+      if elided = postings.select {|p| p.amount.nil? }.first
+        elided.amount = Amount.new(commodity: sum.commodity,
+                                   quantity: (sum.quantity * -1))
       end
+
+      self
+    end
+
+    def balanced?
+      elided_amounts = postings.select {|p| p.amount.nil? }.count
+      raise ArgumentError if elided_amounts > 1
+      complete! if elided_amounts == 1
+
+      sum = postings.map {|p| p.price }.reduce(:+)
 
       (sum.quantity == 0) ? true : false
     end

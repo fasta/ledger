@@ -3,6 +3,13 @@ module Ledger
     attr_accessor :account, :amount
     attr_accessor :commodity_price
 
+    attr_writer :elided
+    def elided?; @elided; end
+
+    def initialize
+      @elided = false
+    end
+
     def self.from_s(string)
       posting = Posting.new
 
@@ -15,6 +22,8 @@ module Ledger
         if price
           posting.commodity_price = Amount.from_s(price)
         end
+      else
+        posting.elided = true
       end
 
       posting
