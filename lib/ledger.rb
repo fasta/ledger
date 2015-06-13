@@ -10,6 +10,7 @@ require 'ledger/journal'
 require 'ledger/transaction'
 require 'ledger/posting'
 require 'ledger/amount'
+require 'ledger/account'
 
 
 
