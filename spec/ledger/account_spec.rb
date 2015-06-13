@@ -9,11 +9,11 @@ describe Account do
     it "should return an Account initialized with the given options or nil" do
       a = Account.new
       a.name.must_be_nil
-      a.amount.must_be_nil
+      a.amounts.must_equal []
 
-      a = Account.new(name: 'Account Name', amount: Amount.from_s('CHF 1.00'))
+      a = Account.new(name: 'Account Name', amounts: [Amount.from_s('CHF 1.00')])
       a.name.must_equal 'Account Name'
-      a.amount.must_equal Amount.from_s('CHF 1.00')
+      a.amounts.must_equal [Amount.from_s('CHF 1.00')]
     end
   end
 
@@ -65,9 +65,26 @@ describe Account do
       ]
 
       Account.from_transactions(txs).must_equal [
-        Account.new(name: 'Assets', amount: Amount.from_s('$25.00')),
-        Account.new(name: 'Equity', amount: Amount.from_s('$-100.00')),
-        Account.new(name: 'Expenses', amount: Amount.from_s('$75.00'))
+        Account.new(name: 'Assets', amounts: [Amount.from_s('$25.00')]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-100.00')]),
+        Account.new(name: 'Expenses', amounts: [Amount.from_s('$75.00')])
+      ]
+    end
+
+    it "should calculate different commodities in one account separately" do
+      txs = [
+        Transaction.new(postings: [Posting.from_s('Assets   $100.00'),
+                                   Posting.from_s('Assets   40 AAPL @ $1.00'),
+                                   Posting.from_s('Equity')]).complete!,
+        Transaction.new(postings: [Posting.from_s('Expenses   $75.00'),
+                                   Posting.from_s('Assets')]).complete!
+      ]
+
+      Account.from_transactions(txs).must_equal [
+        Account.new(name: 'Assets', amounts: [Amount.from_s('$25.00'),
+                                             Amount.from_s('40 AAPL')]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-140.00')]),
+        Account.new(name: 'Expenses', amounts: [Amount.from_s('$75.00')])
       ]
     end
   end
