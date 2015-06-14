@@ -21,6 +21,33 @@ describe Account do
     end
   end
 
+  describe "#total_amounts" do
+    it "should return the amounts if there are no subaccounts" do
+      a = Account.new(amounts: [Amount.from_s('$100.00'), Amount.from_s('50 AAPL')])
+
+      a.total_amounts.must_equal [
+        Amount.from_s('$100.00'),
+        Amount.from_s('50 AAPL')
+      ]
+    end
+
+    it "should return the total of the amounts and the total_amounts of the subaccounts" do
+      a = Account.new(amounts: [Amount.from_s('$100.00')],
+                      subaccounts: [
+                        Account.new(amounts: [Amount.from_s('$50.00')],
+                                    subaccounts: [
+                                      Account.new(amounts: [Amount.from_s('$25.00')])
+                                    ]),
+                        Account.new(amounts: [Amount.from_s('50 AAPL')])
+                      ])
+
+      a.total_amounts.must_equal [
+        Amount.from_s('$175.00'),
+        Amount.from_s('50 AAPL')
+      ]
+    end
+  end
+
   describe "#==" do
     it "should return true if all attributes equal each other" do
       a = Account.new

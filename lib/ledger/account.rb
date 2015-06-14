@@ -9,6 +9,20 @@ module Ledger
       @subaccounts = options[:subaccounts] || []
     end
 
+    def total_amounts
+      totals = subaccounts.map(&:total_amounts).flatten + amounts
+
+      totals.reduce([]) do |total, amount|
+        unless total.map(&:commodity).include?(amount.commodity)
+          total << amount
+        else
+          total.map! {|t| (t.commodity == amount.commodity) ? t + amount : t }
+        end
+
+        total
+      end
+    end
+
     def self.organize(accounts)
       raise ArgumentError if accounts.map(&:name).uniq.count != accounts.count
 
