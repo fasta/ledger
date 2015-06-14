@@ -10,10 +10,14 @@ describe Account do
       a = Account.new
       a.name.must_be_nil
       a.amounts.must_equal []
+      a.subaccounts.must_equal []
 
-      a = Account.new(name: 'Account Name', amounts: [Amount.from_s('CHF 1.00')])
+      a = Account.new(name: 'Account Name',
+                      amounts: [Amount.from_s('CHF 1.00')],
+                      subaccounts: [Account.new(name: 'Subaccount')])
       a.name.must_equal 'Account Name'
       a.amounts.must_equal [Amount.from_s('CHF 1.00')]
+      a.subaccounts.first.must_equal Account.new(name: 'Subaccount')
     end
   end
 
@@ -30,6 +34,28 @@ describe Account do
       b = Account.new(name: 'B')
 
       (a == b).must_equal false
+    end
+
+    it "should check all attributes"
+  end
+
+  describe ".organize" do
+    it "should organize the accounts hierarchically" do
+      accounts = [
+        Account.new(name: 'Assets:Bank:BankA'),
+        Account.new(name: 'Assets:Bank:BankB'),
+        Account.new(name: 'Assets:Cash'),
+        Account.new(name: 'Equity')
+      ]
+
+      Account.organize(accounts).must_equal [
+        Account.new(name: 'Assets', subaccounts: [
+          Account.new(name: 'Bank', subaccounts: [
+            Account.new(name: 'BankA'),
+            Account.new(name: 'BankB')]),
+          Account.new(name: 'Cash')]),
+        Account.new(name: 'Equity')
+      ]
     end
   end
   

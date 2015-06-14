@@ -1,10 +1,49 @@
 module Ledger
   class Account
     attr_accessor :name, :amounts
+    attr_accessor :subaccounts
 
     def initialize(options={})
       @name = options[:name] || nil
       @amounts = options[:amounts] || []
+      @subaccounts = options[:subaccounts] || []
+    end
+
+    def self.organize(accounts)
+      organized = []
+      accounts.each do |account|
+
+        account.name.split(':').reduce(nil) do |parent, child_name|
+          child = Account.new(name: child_name)
+
+          # If no parent is set, the Account name must be on the top level,
+          # in which case it cannot be retrieved from the parents' subaccounts,
+          # but may be retrieved from the array containing already organized
+          # Accounts.
+          if parent.nil?
+            # Check if an Account with this name already exists. If not,
+            # add a new Account for this name, else use the existing one.
+            if c = organized.select {|o| o.name == child_name }.first
+              child = c
+            else
+              organized << child
+            end
+          else
+            # Check if an Account with this name already exists. If not,
+            # add a new Account for this name, else use the existing one.
+            if c = parent.subaccounts.select {|s| s.name == child_name }.first
+              child = c
+            else
+              parent.subaccounts << child
+            end
+          end
+
+          child
+        end
+
+      end
+
+      organized
     end
 
     def self.from_transactions(transactions)
@@ -32,7 +71,13 @@ module Ledger
     end
 
     def ==(other)
-      (name == other.name && amounts == other.amounts) ? true : false
+      if name == other.name &&
+         amounts == other.amounts &&
+         subaccounts == other.subaccounts
+        true
+      else
+        false
+      end
     end
 
   end
