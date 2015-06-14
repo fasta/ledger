@@ -13,7 +13,7 @@ module Ledger
       organized = []
       accounts.each do |account|
 
-        account.name.split(':').reduce(nil) do |parent, child_name|
+        a = account.name.split(':').reduce(nil) do |parent, child_name|
           child = Account.new(name: child_name)
 
           # If no parent is set, the Account name must be on the top level,
@@ -40,6 +40,7 @@ module Ledger
 
           child
         end
+        a.amounts = account.amounts
 
       end
 

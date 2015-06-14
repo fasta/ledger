@@ -40,7 +40,9 @@ describe Account do
   end
 
   describe ".organize" do
-    it "should organize the accounts hierarchically" do
+    it "should raise an ArgumentError if two Accounts with the same name are provided"
+
+    it "should organize the Accounts hierarchically" do
       accounts = [
         Account.new(name: 'Assets:Bank:BankA'),
         Account.new(name: 'Assets:Bank:BankB'),
@@ -55,6 +57,26 @@ describe Account do
             Account.new(name: 'BankB')]),
           Account.new(name: 'Cash')]),
         Account.new(name: 'Equity')
+      ]
+    end
+
+    it "should set the amounts of the Accounts" do
+      accounts = [
+        Account.new(name: 'Assets:Bank:BankA', amounts: [Amount.from_s('$100.00')]),
+        Account.new(name: 'Assets:Bank:BankB', amounts: [Amount.from_s('CHF 100.00')]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-100.00'),
+                                              Amount.from_s('CHF -100.00')])
+      ]
+
+      Account.organize(accounts).must_equal [
+        Account.new(name: 'Assets', subaccounts: [
+          Account.new(name: 'Bank', subaccounts: [
+            Account.new(name: 'BankA', amounts: [Amount.from_s('$100.00')]),
+            Account.new(name: 'BankB', amounts: [Amount.from_s('CHF 100.00')])
+            ])
+        ]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-100.00'),
+                                              Amount.from_s('CHF -100.00')])
       ]
     end
   end
