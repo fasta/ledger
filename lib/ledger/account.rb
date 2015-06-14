@@ -10,6 +10,8 @@ module Ledger
     end
 
     def self.organize(accounts)
+      raise ArgumentError if accounts.map(&:name).uniq.count != accounts.count
+
       organized = []
       accounts.each do |account|
 

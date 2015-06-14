@@ -40,7 +40,15 @@ describe Account do
   end
 
   describe ".organize" do
-    it "should raise an ArgumentError if two Accounts with the same name are provided"
+    it "should raise an ArgumentError if two Accounts with the same name are provided" do
+      accounts = [
+        Account.new(name: 'Assets'),
+        Account.new(name: 'Assets'),
+        Account.new(name: 'Equity')
+      ]
+
+      -> { Account.organize(accounts) }.must_raise ArgumentError
+    end
 
     it "should organize the Accounts hierarchically" do
       accounts = [
