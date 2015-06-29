@@ -1,6 +1,6 @@
 module Ledger
   class Account
-    attr_accessor :name, :amounts
+    attr_accessor :name, :amounts, :alias
     attr_accessor :subaccounts
 
     def initialize(options={})
@@ -87,10 +87,24 @@ module Ledger
       end
     end
 
+    def self.from_s(string)
+      a = Account.new
+
+      lines = string.split("\n").map(&:strip)
+
+      a.name = lines.shift.split(' ', 2).last
+
+      _alias = lines.select {|l| l.start_with?('alias ') }.first
+      a.alias = _alias.split(' ', 2).last if _alias
+
+      a
+    end
+
     def ==(other)
-      if name == other.name &&
-         amounts == other.amounts &&
-         subaccounts == other.subaccounts
+      if self.name == other.name &&
+         self.amounts == other.amounts &&
+         self.subaccounts == other.subaccounts &&
+         self.alias == other.alias
         true
       else
         false

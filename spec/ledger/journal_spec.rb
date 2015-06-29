@@ -30,13 +30,17 @@ EoT
   describe ".parse" do
     it "should return the parsed Journal" do
       j = Journal.parse(<<EoT
+account Account
+  alias A
+
 2015/05/30 Description
   Account   $1
   Account
 EoT
 )
       j.transactions.count.must_equal 1
-      j.transactions.first.line_nr.must_equal 1
+      j.transactions.first.line_nr.must_equal 4
+      j.accounts.count.must_equal 1
     end
   end
 

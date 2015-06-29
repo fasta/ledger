@@ -1,6 +1,6 @@
 module Ledger
   class Journal
-    attr_accessor :transactions
+    attr_accessor :transactions, :accounts
 
     def initialize
       @transactions = []
@@ -14,6 +14,8 @@ module Ledger
       blocks = parse_to_blocks(string)
 
       # Parse blocks
+      journal.accounts = blocks.select {|line, block| block =~ /^account / }
+        .map {|line, block| Account.from_s(block) }
       journal.transactions = blocks.select {|line, block| block =~ /^\d{4}\/\d{2}\/\d{2} / }
         .map {|line, block| Transaction.from_s(block, line_nr: line) }
 

@@ -172,5 +172,19 @@ describe Account do
     end
   end
 
+  describe ".from_s" do
+    it "should return an Account matching the string" do
+      str = <<-EoT
+      account Assets:Bank
+        alias Bank
+      EoT
+      a = Account.from_s(str)
+
+      a.must_be_instance_of Account
+      a.name.must_equal 'Assets:Bank'
+      a.alias.must_equal 'Bank'
+    end
+  end
+
 end
 
