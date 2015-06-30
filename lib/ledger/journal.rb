@@ -10,7 +10,7 @@ module Ledger
     def valid?
       accounts_balanced = transactions.reduce(true) {|mem, tx| (mem) ? tx.balanced? : false }
 
-      accounts_defined = (transactions.map {|tx| tx.postings.map(&:account) }.flatten -
+      accounts_defined = (transactions.map {|tx| tx.postings.map(&:account_name) }.flatten -
         accounts.map(&:name)).empty?
 
       accounts_balanced && accounts_defined

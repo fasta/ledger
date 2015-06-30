@@ -46,9 +46,9 @@ describe Transaction do
 
       tx.complete!
 
-      tx.postings.select {|p| p.account == 'Account A' }.first
+      tx.postings.select {|p| p.account_name == 'Account A' }.first
         .amount.must_equal Amount.from_s('$24.00')
-      tx.postings.select {|p| p.account == 'Account B' }.first
+      tx.postings.select {|p| p.account_name == 'Account B' }.first
         .amount.must_equal Amount.from_s('$-24.00')
     end
 
@@ -100,7 +100,7 @@ describe Transaction do
 
       tx.must_respond_to(:complete!)
       tx.balanced?.must_equal true
-      tx.postings.select {|p| p.account == 'Account B' }.first
+      tx.postings.select {|p| p.account_name == 'Account B' }.first
         .amount.must_equal Amount.from_s('$-24.00')
     end
 
@@ -175,7 +175,7 @@ describe Transaction do
       EoT
 
       tx = Transaction.from_s(str)
-      tx.postings.select {|p| p.account == 'Account B' }.first
+      tx.postings.select {|p| p.account_name == 'Account B' }.first
         .amount.must_equal Amount.from_s('$-1.00')
     end
   end

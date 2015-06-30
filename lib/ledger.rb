@@ -22,7 +22,8 @@ module Ledger
 
     accounts = transactions.reduce({}) do |accounts, tx|
       tx.postings.each do |p|
-        accounts[p.account] = (accounts[p.account]) ? accounts[p.account] + p.amount : p.amount
+        accounts[p.account_name] =
+          (accounts[p.account_name]) ? accounts[p.account_name] + p.amount : p.amount
       end
 
       accounts

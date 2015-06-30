@@ -18,7 +18,7 @@ describe Posting do
       p = Posting.from_s("Account Name    CHF 1.00")
 
       p.must_be_instance_of Posting
-      p.account.must_equal "Account Name"
+      p.account_name.must_equal "Account Name"
       p.amount.must_equal Amount.from_s('CHF 1.00')
       p.commodity_price.must_be_nil
     end
@@ -26,7 +26,7 @@ describe Posting do
     it "should return a Posting with a commodity price if so specified" do
       p = Posting.from_s("Account Name    1 AAPL @ $9.95")
 
-      p.account.must_equal "Account Name"
+      p.account_name.must_equal "Account Name"
       p.amount.must_equal Amount.from_s('1 AAPL')
       p.commodity_price.must_equal Amount.from_s('$9.95')
     end
@@ -34,7 +34,7 @@ describe Posting do
     it "should mark the Posting if the amount has been elided" do
       p = Posting.from_s("Account Name")
 
-      p.account.must_equal "Account Name"
+      p.account_name.must_equal "Account Name"
       p.amount.must_be_nil
       p.elided?.must_equal true
     end

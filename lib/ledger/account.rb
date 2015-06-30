@@ -69,7 +69,7 @@ module Ledger
 
       transactions.reduce([]) do |accounts, tx|
         tx.postings.each do |p|
-          if account = accounts.select {|a| a.name == p.account }.first
+          if account = accounts.select {|a| a.name == p.account_name }.first
             # Update total amount if commodity is already present
             account.amounts.map! do |a|
               (a.commodity == p.amount.commodity) ? a + p.amount : a
@@ -79,7 +79,7 @@ module Ledger
               account.amounts << p.amount
             end
           else
-            accounts << Account.new(name: p.account, amounts: [p.amount])
+            accounts << Account.new(name: p.account_name, amounts: [p.amount])
           end
         end
 

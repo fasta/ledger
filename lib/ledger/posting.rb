@@ -1,6 +1,6 @@
 module Ledger
   class Posting
-    attr_accessor :account, :amount
+    attr_accessor :account_name, :amount
     attr_accessor :commodity_price
 
     attr_writer :elided
@@ -13,7 +13,7 @@ module Ledger
     def self.from_s(string)
       posting = Posting.new
 
-      posting.account, posting.amount = string.split(/\s\s+/, 2).map {|e| e.strip }
+      posting.account_name, posting.amount = string.split(/\s\s+/, 2).map {|e| e.strip }
       if posting.amount
         amount, price = posting.amount.split(' @ ', 2)
 
