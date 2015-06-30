@@ -2,8 +2,18 @@ module Ledger
   class Journal
     attr_accessor :transactions, :accounts
 
-    def initialize
-      @transactions = []
+    def initialize(options={})
+      @accounts = options[:accounts] || []
+      @transactions = options[:transactions] || []
+    end
+
+    def valid?
+      accounts_balanced = transactions.reduce(true) {|mem, tx| (mem) ? tx.balanced? : false }
+
+      accounts_defined = (transactions.map {|tx| tx.postings.map(&:account) }.flatten -
+        accounts.map(&:name)).empty?
+
+      accounts_balanced && accounts_defined
     end
 
     def self.parse(string)
