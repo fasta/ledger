@@ -11,13 +11,16 @@ describe Account do
       a.name.must_be_nil
       a.amounts.must_equal []
       a.subaccounts.must_equal []
+      a.alias.must_equal nil
 
       a = Account.new(name: 'Account Name',
                       amounts: [Amount.from_s('CHF 1.00')],
-                      subaccounts: [Account.new(name: 'Subaccount')])
+                      subaccounts: [Account.new(name: 'Subaccount')],
+                      alias: 'Alias')
       a.name.must_equal 'Account Name'
       a.amounts.must_equal [Amount.from_s('CHF 1.00')]
       a.subaccounts.first.must_equal Account.new(name: 'Subaccount')
+      a.alias.must_equal 'Alias'
     end
   end
 

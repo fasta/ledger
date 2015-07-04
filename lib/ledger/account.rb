@@ -7,6 +7,7 @@ module Ledger
       @name = options[:name] || nil
       @amounts = options[:amounts] || []
       @subaccounts = options[:subaccounts] || []
+      @alias = options[:alias] || nil
     end
 
     def total_amounts
