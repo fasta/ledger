@@ -15,6 +15,11 @@ module Ledger
           a = accounts.select {|a| a.alias == account_total.name }.first.clone
           a.amounts = account_total.amounts
           a
+        elsif aliases.include?(account_total.name.split(':', 2).first)
+          _alias, name = account_total.name.split(':', 2)
+          account_total.name = "#{accounts.select {|a| a.alias == _alias }.first.name}:#{name}"
+
+          account_total
         else
           account_total
         end

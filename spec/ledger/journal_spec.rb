@@ -57,7 +57,27 @@ describe Journal do
       ]
     end
 
-    it "should expand aliases with further subdivision"
+    it "should expand aliases of further subdivided accounts" do
+      j = Journal.new(accounts: [
+                        Account.new(:name => 'Assets', :alias => 'A'),
+                        Account.new(:name => 'A:Account A'),
+                        Account.new(:name => 'A:Account B'),
+                        Account.new(name: 'Equity')],
+                      transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('A:Account A   $10.00'),
+                                          Posting.from_s('A:Account B   $20.00'),
+                                          Posting.from_s('Equity    $-30.00')]),
+                        Transaction.new(postings: [
+                                          Posting.from_s('A:Account A   $5.00'),
+                                          Posting.from_s('A:Account B   $-5.00')])])
+
+      j.balance.must_equal [
+        Account.new(name: 'Assets:Account A', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Assets:Account B', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-30.00')])
+      ]
+    end
   end
 
   describe "#valid?" do
