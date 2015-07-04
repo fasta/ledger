@@ -17,6 +17,49 @@ describe Journal do
     end
   end
 
+  describe "#balance" do
+    it "should raise an ArgumentError if the Journal is not valid"
+    it "should return an Array of all Accounts with calculated amounts" do
+      j = Journal.new(transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Assets:A    $10.00'),
+                                          Posting.from_s('Assets:B    $20.00'),
+                                          Posting.from_s('Equity    $-30.00')]),
+                        Transaction.new(postings: [
+                                          Posting.from_s('Assets:A    $5.00'),
+                                          Posting.from_s('Assets:B    $-5.00')])])
+
+      j.balance.must_equal [
+        Account.new(name: 'Assets:A', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Assets:B', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-30.00')])
+      ]
+    end
+
+    it "should expand the aliases used in the transactions to the full account name" do
+      j = Journal.new(accounts: [
+                        Account.new(:name => 'Assets:A', :alias => 'A'),
+                        Account.new(:name => 'Assets:B', :alias => 'B'),
+                        Account.new(name: 'Equity')],
+                      transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('A    $10.00'),
+                                          Posting.from_s('B    $20.00'),
+                                          Posting.from_s('Equity    $-30.00')]),
+                        Transaction.new(postings: [
+                                          Posting.from_s('A    $5.00'),
+                                          Posting.from_s('B    $-5.00')])])
+
+      j.balance.must_equal [
+        Account.new(name: 'Assets:A', alias: 'A', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Assets:B', alias: 'B', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Equity', amounts: [Amount.from_s('$-30.00')])
+      ]
+    end
+
+    it "should expand aliases with further subdivision"
+  end
+
   describe "#valid?" do
     it "should return false if the Journal contains unbalanced Transactions" do
       j = Journal.new(accounts: [

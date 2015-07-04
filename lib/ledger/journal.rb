@@ -7,6 +7,20 @@ module Ledger
       @transactions = options[:transactions] || []
     end
 
+    def balance
+      aliases = accounts.map(&:alias).compact
+
+      Account.from_transactions(transactions).map do |account_total|
+        if aliases.include?(account_total.name)
+          a = accounts.select {|a| a.alias == account_total.name }.first.clone
+          a.amounts = account_total.amounts
+          a
+        else
+          account_total
+        end
+      end
+    end
+
     def valid?
       transactions_balanced = transactions.reduce(true) {|mem, tx| (mem) ? tx.balanced? : false }
 
