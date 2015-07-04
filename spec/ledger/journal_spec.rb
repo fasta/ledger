@@ -60,8 +60,8 @@ describe Journal do
     it "should expand aliases of further subdivided accounts" do
       j = Journal.new(accounts: [
                         Account.new(:name => 'Assets', :alias => 'A'),
-                        Account.new(:name => 'A:Account A'),
-                        Account.new(:name => 'A:Account B'),
+                        Account.new(:name => 'Assets:Account A', :alias => 'SomethingElse'),
+                        Account.new(:name => 'Assets:Account B'),
                         Account.new(name: 'Equity')],
                       transactions: [
                         Transaction.new(postings: [
@@ -73,7 +73,8 @@ describe Journal do
                                           Posting.from_s('A:Account B   $-5.00')])])
 
       j.balance.must_equal [
-        Account.new(name: 'Assets:Account A', amounts: [Amount.from_s('$15.00')]),
+        Account.new(name: 'Assets:Account A', alias: 'SomethingElse',
+                    amounts: [Amount.from_s('$15.00')]),
         Account.new(name: 'Assets:Account B', amounts: [Amount.from_s('$15.00')]),
         Account.new(name: 'Equity', amounts: [Amount.from_s('$-30.00')])
       ]
