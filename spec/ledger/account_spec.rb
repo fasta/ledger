@@ -66,7 +66,16 @@ describe Account do
       (a == b).must_equal false
     end
 
-    it "should check all attributes"
+    it "should check all attributes" do
+      a = Account.new
+
+      a.instance_variables.each do |var|
+        b = Account.new
+        b.instance_variable_set(var, 'Example')
+
+        (a == b).must_equal false
+      end
+    end
   end
 
   describe ".organize" do
