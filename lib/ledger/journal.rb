@@ -8,6 +8,8 @@ module Ledger
     end
 
     def balance
+      raise ArgumentError unless valid?
+
       aliases = accounts.map(&:alias).compact
 
       Account.from_transactions(transactions).map do |account_total|
@@ -31,8 +33,12 @@ module Ledger
     def valid?
       transactions_balanced = transactions.reduce(true) {|mem, tx| (mem) ? tx.balanced? : false }
 
-      accounts_defined = (transactions.map {|tx| tx.postings.map(&:account_name) }.flatten -
-        accounts.map(&:name)).empty?
+      accounts_defined = transactions.map {|tx| tx.postings.map(&:account_name) }.flatten
+      accounts_defined -= accounts.map(&:name)
+      unless accounts_defined.empty?
+        accounts_defined = accounts_defined.map {|a| a.split(':', 2).first } - accounts.map(&:alias)
+      end
+      accounts_defined = accounts_defined.empty?
 
       transactions_balanced && accounts_defined
     end

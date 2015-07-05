@@ -18,9 +18,21 @@ describe Journal do
   end
 
   describe "#balance" do
-    it "should raise an ArgumentError if the Journal is not valid"
-    it "should return an Array of all Accounts with calculated amounts" do
+    it "should raise an ArgumentError if the Journal is not valid" do
       j = Journal.new(transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Account   $10.00'),
+                                          Posting.from_s('Account   $-10.00')])])
+
+      -> { j.balance }.must_raise ArgumentError
+    end
+
+    it "should return an Array of all Accounts with calculated amounts" do
+      j = Journal.new(accounts: [
+                        Account.new(name: 'Assets:A'),
+                        Account.new(name: 'Assets:B'),
+                        Account.new(name: 'Equity')],
+                      transactions: [
                         Transaction.new(postings: [
                                           Posting.from_s('Assets:A    $10.00'),
                                           Posting.from_s('Assets:B    $20.00'),
