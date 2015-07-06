@@ -15,6 +15,13 @@ module Ledger
       Account.from_transactions(transactions).map do |account_total|
         if aliases.include?(account_total.name)
           a = accounts.select {|a| a.alias == account_total.name }.first.clone
+
+          # The amounts of the declared accounts can be set without regard for
+          # the pre-existing value because these accounts are created from the
+          # 'account' command directive, which can not specify amounts.
+          # Amounts are calculated only from transactions involving the account
+          # name. Also aggregating amounts of subaccounts happens in the
+          # Account.organise class method.
           a.amounts = account_total.amounts
           a
         elsif aliases.include?(account_total.name.split(':', 2).first)
@@ -22,6 +29,7 @@ module Ledger
           name = "#{accounts.select {|a| a.alias == _alias }.first.name}:#{name}"
 
           a = accounts.select {|a| a.name == name }.first.clone
+          # See comment above
           a.amounts = account_total.amounts
           a
         else
@@ -43,6 +51,16 @@ module Ledger
       transactions_balanced && accounts_defined
     end
 
+    # Parses the given representations of command directives and transactions,
+    # and creates a journal object.
+    #
+    # @note This method is not necessarily efficient performance-wise. It first
+    #   splits the provided string into blocks of directives/transactions, which
+    #   are then iterated over once for directives and once for transactions
+    #   (which is when the parsing happens). This may have been handled more
+    #   efficiently, but at a cost to readability. It is assumed that most ledger
+    #   files will not be large enough for this to matter, which is why the more
+    #   readable way has been chosen.
     def self.parse(string)
       journal = Journal.new
 
