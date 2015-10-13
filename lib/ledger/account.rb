@@ -14,7 +14,7 @@ module Ledger
       totals = subaccounts.map(&:total_amounts).flatten + amounts
 
       totals.reduce([]) do |total, amount|
-        unless total.map(&:commodity).include?(amount.commodity)
+        if not total.map(&:commodity).include?(amount.commodity)
           total << amount
         else
           total.map! {|t| (t.commodity == amount.commodity) ? t + amount : t }
@@ -70,7 +70,8 @@ module Ledger
 
       transactions.reduce([]) do |accounts, tx|
         tx.postings.each do |p|
-          if account = accounts.select {|a| a.name == p.account_name }.first
+          account = accounts.select {|a| a.name == p.account_name }.first
+          if account
             # Update total amount if commodity is already present
             account.amounts.map! do |a|
               (a.commodity == p.amount.commodity) ? a + p.amount : a
@@ -89,23 +90,17 @@ module Ledger
     end
 
     def self.from_s(string)
-      a = Account.new
-
       lines = string.split("\n").map(&:strip)
 
-      a.name = lines.shift.split(' ', 2).last
-
-      _alias = lines.select {|l| l.start_with?('alias ') }.first
-      a.alias = _alias.split(' ', 2).last if _alias
-
-      a
+      Account.new(:name => lines.first.split(' ', 2).last,
+                  :alias => lines.map{|l| l[/alias (.*)/, 1] }.compact.first)
     end
 
     def ==(other)
-      if self.name == other.name &&
-         self.amounts == other.amounts &&
-         self.subaccounts == other.subaccounts &&
-         self.alias == other.alias
+      if name == other.name &&
+         amounts == other.amounts &&
+         subaccounts == other.subaccounts &&
+         self.alias == other.alias    # self needed because alias is a ruby keyword
         true
       else
         false

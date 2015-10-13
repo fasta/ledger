@@ -130,6 +130,70 @@ describe Journal do
     end
   end
 
+  describe "#transactions_balanced?" do
+    it "should return false if the Journal contains unbalanced Transactions" do
+      j = Journal.new(transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Account A   $10.00'),
+                                          Posting.from_s('Account B   $-10.00')]),
+                        Transaction.new(postings: [
+                                          Posting.from_s('Account A   $10.00'),
+                                          Posting.from_s('Account B   $-5.00')])])
+
+      j.transactions_balanced?.must_equal false
+    end
+
+    it "should return true if all Transactions are balanced" do
+      j = Journal.new(transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Account A   $10.00'),
+                                          Posting.from_s('Account B   $-10.00')]),
+                        Transaction.new(postings: [
+                                          Posting.from_s('Account A   $10.00'),
+                                          Posting.from_s('Account B   $-10.00')])])
+
+      j.transactions_balanced?.must_equal true
+    end
+  end
+
+  describe "#undefined_account_names" do
+    it "should be return a list of the names all undefined accounts used in the Transactions" do
+      j = Journal.new(accounts: [
+                        Account.new(name: 'Account B')],
+                      transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Account A   $10.00'),
+                                          Posting.from_s('Account B   $-10.00')])])
+
+      j.undefined_account_names.must_equal ['Account A']
+    end
+
+    it "should not return known aliases" do
+      j = Journal.new(accounts: [
+                        Account.new(:name => 'Account A', :alias => 'Alias'),
+                        Account.new(name: 'Account B')],
+                      transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Alias   $10.00'),
+                                          Posting.from_s('Account B   $-10.00')])])
+
+      j.undefined_account_names.must_equal []
+    end
+
+    it "should not return the names of subaccounts of aliased accounts" do
+      j = Journal.new(accounts: [
+                        Account.new(:name => 'Account', :alias => 'Alias'),
+                        Account.new(name: 'Account:A'),
+                        Account.new(name: 'Account:B')],
+                      transactions: [
+                        Transaction.new(postings: [
+                                          Posting.from_s('Alias:A   $10.00'),
+                                          Posting.from_s('Account:B   $-10.00')])])
+
+      j.undefined_account_names.must_equal []
+    end
+  end
+
   describe ".parse_to_blocks" do
     it "should return a Hash of the blocks within the provided string with the line number as key" do
       blocks = Journal.parse_to_blocks(<<EoT

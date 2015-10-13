@@ -39,16 +39,19 @@ module Ledger
     end
 
     def valid?
-      transactions_balanced = transactions.reduce(true) {|mem, tx| (mem) ? tx.balanced? : false }
+      transactions_balanced? && undefined_account_names.empty?
+    end
 
-      accounts_defined = transactions.map {|tx| tx.postings.map(&:account_name) }.flatten
-      accounts_defined -= accounts.map(&:name)
-      unless accounts_defined.empty?
-        accounts_defined = accounts_defined.map {|a| a.split(':', 2).first } - accounts.map(&:alias)
-      end
-      accounts_defined = accounts_defined.empty?
+    def transactions_balanced?
+      transactions.all?(&:balanced?)
+    end
 
-      transactions_balanced && accounts_defined
+    def undefined_account_names
+      account_names = transactions.map {|tx| tx.postings.map(&:account_name) }.flatten
+      # Remove all defined account names
+      account_names -= accounts.map(&:name)
+      # Remove all names that are (or start with) a known alias
+      account_names.reject {|a| accounts.map(&:alias).include?(a.split(':', 2).first) }
     end
 
     # Parses the given representations of command directives and transactions,
